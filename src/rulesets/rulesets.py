@@ -11,6 +11,7 @@ from inspect import isclass
 from pkgutil import iter_modules
 from importlib import import_module
 from abc import ABC, abstractmethod
+from src.common.utils import ruleset_dir
 
 
 class Ruleset(ABC):
@@ -40,7 +41,7 @@ class RulesetManager:
 
     def __init__(self):
         self.logger.info("registering rulesets...")
-        self.rulesets = self.discover_rulesets("rulesets")
+        self.rulesets = self.discover_rulesets(ruleset_dir)
         self.logger.info(f"{self.ruleset_count} rulesets registered.")
 
     def discover_rulesets(self, path):
@@ -87,6 +88,6 @@ class RulesetManager:
         for ruleset in self.rulesets:
             ruleset.rebuild()
 
-    def hook_rules(self):
+    def hook_rules(self, sudoku):
         for ruleset in self.rulesets:
-            yield ruleset.generate()
+            yield ruleset.generate(sudoku=sudoku).rstrip()

@@ -8,12 +8,13 @@ class BasicRules(Ruleset):
     def register(self):
         return "Basic Rules"
 
-    def generate(self):
+    def generate(self, **kwargs):
         try:
             return read_static("basic_rules.txt")
         except FileNotFoundError:
             self.rebuild()
             self.generate()
+            return read_static("basic_rules.txt")
 
     def rebuild(self):
         rows = and_clause([self.row(i) for i in ks])

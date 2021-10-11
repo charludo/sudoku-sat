@@ -1,9 +1,3 @@
-# ToDo
-
-- copy/paste formulas together
-- interface with limboole
-- generate solution from output
-
 # Install Instructions
 
 - unpack, compile, install limboole & lingeling next to this cloned repo

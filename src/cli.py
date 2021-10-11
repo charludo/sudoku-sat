@@ -1,7 +1,11 @@
 import re
+import os
 import click
 import logging
+import subprocess
 import coloredlogs
+from src.rulesets.rulesets import RulesetManager
+from src.common.connectives import and_clause
 
 
 def setup_loggers(level):
@@ -31,14 +35,23 @@ def setup_loggers(level):
 
 
 @click.command()
+@click.option("--force-rebuild", "-r", help="force a rebuild of static rulesets", is_flag=True)
 @click.option("--from-file", "-f", help="read sudoku from a file")
 @click.option("--from-string", "-s", help="pass an 81-char sudoku string")
 @click.option("--debug", "-d", help="set logging level to debug", is_flag=True)
-def run(debug, from_string, from_file):
+def run(debug, from_string, from_file, force_rebuild):
     """
     sudoku-sat generates SAT formulas for sudokus with optional additional rulesets
     """
     setup_loggers("DEBUG" if debug else "INFO")
+
+    global RM
+    RM = RulesetManager()
+
+    if force_rebuild:
+        logger.info("rebuilding all static rulesets...")
+        RM.force_rebuild()
+        logger.info("done rebuilding static rulesets.")
 
     if from_string:
         new_from_string(from_string)
@@ -57,12 +70,12 @@ def new_from_cli():
     for i in range(9):
         sudoku += input(f"                             {i} |").ljust(9, ".")[:9].replace(" ", ".")
 
-    print(len(sudoku))
+    solve(sudoku)
 
 
 def new_from_string(sudoku):
     sudoku = sudoku.ljust(81, ".")[:81].replace(" ", ".")
-    print(sudoku)
+    solve(sudoku)
 
 
 def new_from_file(file):
@@ -73,4 +86,50 @@ def new_from_file(file):
     sudoku = re.sub(r"[^1-9]", ".", sudoku)
     sudoku = sudoku.ljust(81, ".")[:81]
 
-    print(sudoku)
+    solve(sudoku)
+
+
+def solve(sudoku):
+    formula = and_clause(RM.hook_rules(sudoku))
+
+    with open("temp.txt", "w") as file:
+        file.write(formula)
+
+    p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
+    (output, error) = p.communicate()
+    p.wait()
+    os.remove("temp.txt")
+
+    if "UNSATISFIABLE formula" in str(output):
+        logger.error("Sudoku posseses no solution.")
+    else:
+        logger.info("Solution found!")
+        logger_indented.info("  ----- | ----- | -----")
+        solution = extract_solution(str(output))
+
+        prettify(solution)
+
+
+def extract_solution(output):
+    solution = ["."] * 81
+
+    matches = re.finditer(r"S(?P<i>\d)(?P<j>\d)(?P<k>\d) = 1", output, re.MULTILINE)
+    for match in matches:
+        i = int(match.group("i"))
+        j = int(match.group("j"))
+        k = match.group("k")
+        solution[(j - 1) + (i - 1) * 9] = k
+
+    return solution
+
+
+def prettify(solution):
+    for i in range(9):
+        line = solution[i*9:(i+1)*9]
+        line.insert(3, " ")
+        line.insert(7, " ")
+        line = " ".join(line)
+        logger_indented.info(f"| {line}")
+
+        if i in [2, 5]:
+            logger_indented.info("-")
