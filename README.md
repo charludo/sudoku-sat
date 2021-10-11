@@ -1,6 +1,6 @@
 # ToDo
 
-- read rules from cli / file
+- copy/paste formulas together
 - interface with limboole
 - generate solution from output
 
