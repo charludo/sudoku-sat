@@ -61,18 +61,30 @@ def run(debug, from_string, from_file, force_rebuild):
     choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
     action = choices.index("Prefills")
     while action != len(choices) - 1:
-        name = choices[action]
-        help = rulesets[name]["help"]
+        # delete layer
+        if action == len(choices) - 2:
+            layers = [*s.get_current_layers(), "[a] abort"]
+            tm = TM(layers)
+            action = tm.show()
 
-        logger.info(f"Ruleset Layer: {name}")
-        logger.info(help)
+            if action != len(layers) - 1:
+                s.delete_layer(layers[action])
 
-        layer = s.layer_from_cli()
-        s.add_layer(name, layer)
+        # add layer
+        else:
+            name = choices[action]
+            help = rulesets[name]["help"]
 
-        logger.debug(f"Added new layer of type {name}:")
-        logger.debug(layer)
+            logger.info(f"Ruleset Layer: {name}")
+            logger.info(help)
 
+            layer = s.layer_from_cli()
+            s.add_layer(name, layer)
+
+            logger.debug(f"Added new layer of type {name}:")
+            logger.debug(layer)
+
+        # next selection
         choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
         tm = TM(choices)
         action = tm.show()
