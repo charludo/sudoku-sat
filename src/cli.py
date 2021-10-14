@@ -54,39 +54,42 @@ def run(debug, from_string, from_file, force_rebuild):
         logger.info("done rebuilding static rulesets.")
 
     if from_string:
-        new_from_string(from_string)
+        layer_from_string(from_string)
     elif from_file:
-        new_from_file(from_file)
+        layer_from_file(from_file)
     else:
-        new_from_cli()
+        logger.info("Enter a new sudoku.")
+        logger.info("Allowed Characters: 123456789 and .")
+        layer_from_cli()
 
 
-def new_from_cli():
-    logger.info("Enter a new sudoku.")
-    logger.info("Allowed Characters: 123456789 and .")
+def layer_from_cli():
     logger_indented.info(" ---------")
 
     sudoku = ""
     for i in range(9):
-        sudoku += input(f"                             {i} |").ljust(9, ".")[:9].replace(" ", ".")
+        sudoku += clean(input(f"                             {i + 1} |"), length=9)
 
     solve(sudoku)
 
 
-def new_from_string(sudoku):
-    sudoku = sudoku.ljust(81, ".")[:81].replace(" ", ".")
+def layer_from_string(sudoku):
+    sudoku = clean(sudoku)
     solve(sudoku)
 
 
-def new_from_file(file):
+def layer_from_file(file):
     with open(file, "r") as f:
-        sudoku = f.read()
-
-    sudoku = sudoku.replace("\n", "")
-    sudoku = re.sub(r"[^1-9]", ".", sudoku)
-    sudoku = sudoku.ljust(81, ".")[:81]
+        sudoku = clean(f.read())
 
     solve(sudoku)
+
+
+def clean(layer, length=81):
+    layer = layer.replace("\n", "")
+    layer = re.sub(r"[^a-zA-Z0-9]", ".", layer)
+    layer = layer.ljust(length, ".")[:length]
+    return layer
 
 
 def solve(sudoku):
