@@ -90,4 +90,6 @@ class RulesetManager:
 
     def hook_rules(self, sudoku):
         for ruleset in self.rulesets:
-            yield ruleset.generate(sudoku=sudoku).rstrip()
+            formula = ruleset.generate(sudoku=sudoku)
+            if formula:
+                yield formula.rstrip()

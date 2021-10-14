@@ -10,4 +10,4 @@ def or_clause(ks):
 
 
 def grouped(clause):
-    return f"({clause})"
+    return f"({clause})" if len(clause) else None
