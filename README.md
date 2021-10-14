@@ -1,9 +1,5 @@
 # ToDo / ToFigureOut
 
-- option to select additional rulesets
-- read in string again
-- give to ruleset, receive SAT
-- notation for additional rulesets
 - check if a sudoku possesses a *unique* solution
 - more interactive cli for solving the sudokus
 

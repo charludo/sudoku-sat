@@ -23,11 +23,11 @@ class Ruleset(ABC):
 
     @abstractmethod
     def register(self):
-        return "Base", 1
+        return "Base", "Help Text", 1
 
     @abstractmethod
-    def generate(self, sudoku, *args, **kwargs):
-        return sudoku
+    def generate(self, layer, *args, **kwargs):
+        return layer
 
     def rebuild(self):
         pass
@@ -70,7 +70,7 @@ class RulesetManager:
                 if isclass(attribute) and issubclass(attribute, Ruleset) and not issubclass(Ruleset, attribute):
                     try:
                         ruleset_instance = attribute()
-                        name, max_layers = ruleset_instance.register()
+                        name, help_text, max_layers = ruleset_instance.register()
                         if name in registered:
                             continue
                         registered.append(name)
@@ -78,6 +78,7 @@ class RulesetManager:
                         self.ruleset_count += 1
                         found_rulesets[name] = {
                                 "max": max_layers,
+                                "help": help_text,
                                 "instance": ruleset_instance
                             }
                     except Exception:
@@ -91,8 +92,5 @@ class RulesetManager:
         for ruleset in self.rulesets:
             ruleset.rebuild()
 
-    def hook_rules(self, sudoku):
-        for name, ruleset in self.rulesets.items():
-            formula = ruleset["instance"].generate(sudoku=sudoku)
-            if formula:
-                yield formula.rstrip()
+    def get_rulesets(self):
+        return self.rulesets

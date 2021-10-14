@@ -6,6 +6,7 @@ setuptools.setup(name='sudoku-sat',
                  entry_points={"console_scripts": ["sudoku-sat = src.cli:run"]},
                  install_requires=[
                     "click>=8.0.0",
-                    "coloredlogs>=15.0.0"
+                    "coloredlogs>=15.0.0",
+                    "simple-term-menu>=1.4.1"
                  ]
                  )

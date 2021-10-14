@@ -1,6 +1,7 @@
 import click
 import logging
 import coloredlogs
+from simple_term_menu import TerminalMenu as TM
 from src.sudoku import Sudoku
 
 
@@ -43,16 +44,37 @@ def run(debug, from_string, from_file, force_rebuild):
 
     s = Sudoku()
 
+    rulesets = s.get_rulesets()
+
     if force_rebuild:
         logger.info("rebuilding all static rulesets...")
         s.force_rebuild()
         logger.info("done rebuilding static rulesets.")
 
-    if from_string:
-        s.layer_from_string(from_string)
-    elif from_file:
-        s.layer_from_file(from_file)
-    else:
-        logger.info("Enter a new sudoku.")
-        logger.info("Allowed Characters: 123456789 and .")
-        s.layer_from_cli()
+    # if from_string:
+    #    s.layer_from_string(from_string)
+    # elif from_file:
+    #    s.layer_from_file(from_file)
+    # else:
+    #    s.layer_from_cli()
+
+    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
+    action = choices.index("Prefills")
+    while action != len(choices) - 1:
+        name = choices[action]
+        help = rulesets[name]["help"]
+
+        logger.info(f"Ruleset Layer: {name}")
+        logger.info(help)
+
+        layer = s.layer_from_cli()
+        s.add_layer(name, layer)
+
+        logger.debug(f"Added new layer of type {name}:")
+        logger.debug(layer)
+
+        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
+        tm = TM(choices)
+        action = tm.show()
+
+    s.solve()

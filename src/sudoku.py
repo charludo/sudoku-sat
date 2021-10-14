@@ -17,28 +17,47 @@ class Sudoku:
         self.logger = logging.getLogger("base.core")
         self.logger_indented = logging.getLogger("indented")
         self.RM = RulesetManager()
+        self.rulesets = self.RM.get_rulesets()
+        self.layers = {}
+        self.add_layer("Basic Rules", None)
+
+    def add_layer(self, name, layer):
+        self.layers.setdefault(name, [])
+        self.layers[name].append(layer)
+
+    def get_available_layers(self):
+        for key, value in self.rulesets.items():
+            self.layers.setdefault(key, [])
+            if value["max"] < 0 or len(self.layers[key]) < value["max"]:
+                yield key
 
     def layer_from_cli(self):
         self.logger_indented.info(" ---------")
 
-        sudoku = ""
+        layer = ""
         for i in range(9):
-            sudoku += clean(input(f"                             {i + 1} |"), length=9)
+            layer += clean(input(f"                             {i + 1} |"), length=9)
 
-        self.solve(sudoku)
+        return layer
 
-    def layer_from_string(self, sudoku):
-        sudoku = clean(sudoku)
-        self.solve(sudoku)
+    def layer_from_string(self, layer):
+        layer = clean(layer)
+        return layer
 
     def layer_from_file(self, file):
         with open(file, "r") as f:
-            sudoku = clean(f.read())
+            layer = clean(f.read())
 
-        self.solve(sudoku)
+        return layer
 
-    def solve(self, sudoku):
-        formula = and_clause(self.RM.hook_rules(sudoku))
+    def solve(self):
+        formula = []
+        for name, layers in self.layers.items():
+            for layer in layers:
+                f = self.rulesets[name]["instance"].generate(layer=layer)
+                if f:
+                    formula.append(f)
+        formula = and_clause(formula)
 
         with open("temp.txt", "w") as file:
             file.write(formula)
@@ -83,3 +102,6 @@ class Sudoku:
 
     def force_rebuild(self):
         self.RM.force_rebuild()
+
+    def get_rulesets(self):
+        return self.rulesets
