@@ -9,4 +9,4 @@ class Prefills(Ruleset):
         return grouped(and_clause(clauses)) if len(clauses) else None
 
     def register(self):
-        return "Prefills"
+        return "Prefills", 1

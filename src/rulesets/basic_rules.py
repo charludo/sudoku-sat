@@ -6,7 +6,7 @@ from src.common.connectives import and_clause, or_clause, grouped, ks
 class BasicRules(Ruleset):
 
     def register(self):
-        return "Basic Rules"
+        return "Basic Rules", 1
 
     def generate(self, **kwargs):
         try:
