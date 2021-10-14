@@ -58,11 +58,15 @@ def run(debug, from_string, from_file, force_rebuild):
     # else:
     #    s.layer_from_cli()
 
-    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
+    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
     action = choices.index("Prefills")
     while action != len(choices) - 1:
-        # delete layer
+        # solve!
         if action == len(choices) - 2:
+            s.solve()
+
+        # delete layer
+        elif action == len(choices) - 3:
             layers = [*s.get_current_layers(), "[a] abort"]
             tm = TM(layers)
             action = tm.show()
@@ -85,8 +89,6 @@ def run(debug, from_string, from_file, force_rebuild):
             logger.debug(layer)
 
         # next selection
-        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku"]
+        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
         tm = TM(choices)
         action = tm.show()
-
-    s.solve()
