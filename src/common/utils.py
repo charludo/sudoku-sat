@@ -1,3 +1,4 @@
+import re
 from os.path import join, dirname
 
 ruleset_dir = join(dirname(dirname(__file__)), "rulesets")
@@ -12,3 +13,10 @@ def write_static(path, content):
 def read_static(path):
     with open(join(static_dir, path), "r") as file:
         return file.read()
+
+
+def clean(layer, length=81):
+    layer = layer.replace("\n", "")
+    layer = re.sub(r"[^a-zA-Z0-9]", ".", layer)
+    layer = layer.ljust(length, ".")[:length]
+    return layer

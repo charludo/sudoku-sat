@@ -1,11 +1,7 @@
-import re
-import os
 import click
 import logging
-import subprocess
 import coloredlogs
-from src.rulesets.rulesets import RulesetManager
-from src.common.connectives import and_clause
+from src.sudoku import Sudoku
 
 
 def setup_loggers(level):
@@ -45,94 +41,18 @@ def run(debug, from_string, from_file, force_rebuild):
     """
     setup_loggers("DEBUG" if debug else "INFO")
 
-    global RM
-    RM = RulesetManager()
+    s = Sudoku()
 
     if force_rebuild:
         logger.info("rebuilding all static rulesets...")
-        RM.force_rebuild()
+        s.force_rebuild()
         logger.info("done rebuilding static rulesets.")
 
     if from_string:
-        layer_from_string(from_string)
+        s.layer_from_string(from_string)
     elif from_file:
-        layer_from_file(from_file)
+        s.layer_from_file(from_file)
     else:
         logger.info("Enter a new sudoku.")
         logger.info("Allowed Characters: 123456789 and .")
-        layer_from_cli()
-
-
-def layer_from_cli():
-    logger_indented.info(" ---------")
-
-    sudoku = ""
-    for i in range(9):
-        sudoku += clean(input(f"                             {i + 1} |"), length=9)
-
-    solve(sudoku)
-
-
-def layer_from_string(sudoku):
-    sudoku = clean(sudoku)
-    solve(sudoku)
-
-
-def layer_from_file(file):
-    with open(file, "r") as f:
-        sudoku = clean(f.read())
-
-    solve(sudoku)
-
-
-def clean(layer, length=81):
-    layer = layer.replace("\n", "")
-    layer = re.sub(r"[^a-zA-Z0-9]", ".", layer)
-    layer = layer.ljust(length, ".")[:length]
-    return layer
-
-
-def solve(sudoku):
-    formula = and_clause(RM.hook_rules(sudoku))
-
-    with open("temp.txt", "w") as file:
-        file.write(formula)
-
-    p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
-    (output, error) = p.communicate()
-    p.wait()
-    os.remove("temp.txt")
-
-    if "UNSATISFIABLE formula" in str(output):
-        logger.error("Sudoku posseses no solution.")
-    else:
-        logger.info("Solution found!")
-        logger_indented.info("  ----- | ----- | -----")
-        solution = extract_solution(str(output))
-
-        prettify(solution)
-
-
-def extract_solution(output):
-    solution = ["."] * 81
-
-    matches = re.finditer(r"S(?P<i>\d)(?P<j>\d)(?P<k>\d) = 1", output, re.MULTILINE)
-    for match in matches:
-        i = int(match.group("i"))
-        j = int(match.group("j"))
-        k = match.group("k")
-        solution[(j - 1) + (i - 1) * 9] = k
-
-    return solution
-
-
-def prettify(solution):
-    for i in range(9):
-        line = solution[i*9:(i+1)*9]
-        line.insert(3, " ")
-        line.insert(7, " ")
-        line = " ".join(line)
-        logger_indented.info(f"| {line}")
-
-        if i in [2, 5]:
-            logger_indented.info("-")
+        s.layer_from_cli()
