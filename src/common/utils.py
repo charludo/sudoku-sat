@@ -17,6 +17,7 @@ def read_static(path):
 
 def clean(layer, length=81):
     layer = layer.replace("\n", "")
+    layer = layer.replace(" ", "")
     layer = re.sub(r"[^a-zA-Z0-9]", ".", layer)
     layer = layer.ljust(length, ".")[:length]
     return layer

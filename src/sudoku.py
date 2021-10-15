@@ -55,11 +55,13 @@ class Sudoku:
         layer = clean(layer)
         return layer
 
-    def layer_from_file(self, file):
+    def layers_from_file(self, file):
         with open(file, "r") as f:
-            layer = clean(f.read())
+            raw = f.read()
 
-        return layer
+        layers_raw = re.finditer(r"\[(?P<name>.*?)\](?P<layer>[^[]*)", raw, re.MULTILINE)
+        for l_r in layers_raw:
+            yield l_r.group("name"), clean(l_r.group("layer"))
 
     def solve(self):
         formula = []

@@ -51,18 +51,26 @@ def run(debug, from_string, from_file, force_rebuild):
         s.force_rebuild()
         logger.info("done rebuilding static rulesets.")
 
-    # if from_string:
-    #    s.layer_from_string(from_string)
-    # elif from_file:
-    #    s.layer_from_file(from_file)
-    # else:
-    #    s.layer_from_cli()
-
     choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
     action = choices.index("Prefills")
+
+    if from_string:
+        layer = s.layer_from_string(from_string)
+        s.add_layer("Prefills", layer)
+        action = -1
+    elif from_file:
+        layers = s.layers_from_file(from_file)
+        for name, layer in layers:
+            s.add_layer(name, layer)
+        action = -1
+
     while action != len(choices) - 1:
+        # do nothing
+        if action == -1:
+            pass
+
         # solve!
-        if action == len(choices) - 2:
+        elif action == len(choices) - 2:
             s.solve()
 
         # delete layer
