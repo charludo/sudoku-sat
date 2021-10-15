@@ -63,6 +63,19 @@ class Sudoku:
         for l_r in layers_raw:
             yield l_r.group("name"), clean(l_r.group("layer"))
 
+    def write_to_file(self):
+        file = ""
+        while not file:
+            file = input("    filename :: ")
+
+        with open(file, "w") as f:
+            for name, layers in self.layers.items():
+                if name != "Basic Rules":
+                    for layer in layers:
+                        f.write(f"[{name}]\n")
+                        f.writelines([" ".join(f"{layer[i:i + 9]}\n") for i in range(0, 81, 9)])
+                        f.write("\n")
+
     def solve(self):
         formula = []
         for name, layers in self.layers.items():

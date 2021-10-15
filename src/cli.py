@@ -51,7 +51,7 @@ def run(debug, from_string, from_file, force_rebuild):
         s.force_rebuild()
         logger.info("done rebuilding static rulesets.")
 
-    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
+    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[e] exit"]
     action = choices.index("Prefills")
 
     if from_string:
@@ -69,12 +69,15 @@ def run(debug, from_string, from_file, force_rebuild):
         if action == -1:
             pass
 
-        # solve!
         elif action == len(choices) - 2:
+            s.write_to_file()
+
+        # solve!
+        elif action == len(choices) - 3:
             s.solve()
 
         # delete layer
-        elif action == len(choices) - 3:
+        elif action == len(choices) - 4:
             layers = [*s.get_current_layers(), "[a] abort"]
             tm = TM(layers)
             action = tm.show()
@@ -98,6 +101,6 @@ def run(debug, from_string, from_file, force_rebuild):
 
         # next selection
         logger.info("Add layer / delete layer / solve / exit:")
-        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
+        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[e] exit"]
         tm = TM(choices)
         action = tm.show()
