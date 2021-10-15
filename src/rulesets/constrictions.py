@@ -1,4 +1,4 @@
-from itertools import permutations
+from itertools import permutations, chain
 from src.rulesets.rulesets import Ruleset
 from src.common.connectives import and_clause, or_clause, grouped, ks
 
@@ -27,11 +27,15 @@ class Constrictions(Ruleset):
             bound_options = [(i, j) for i, j in permutations(ks, 2) if j - i > 1]
 
             for b1, b2 in bound_options:
-                constriction_options = list(set([c for c in permutations(list(range(b1 + 1, b2))*len(fields_lower), len(fields_lower))]))
-
                 rule = f"(({fields[0]}{b1} & {fields[1]}{b2} | {fields[0]}{b2} & {fields[1]}{b1}) & "
-                rule += grouped(or_clause([grouped(and_clause([f"{fields_lower[i]}{c[i]}" for i in range(len(c))])) for c in constriction_options]))
+                rule += and_clause([f"!{f}{k}" for k in chain(range(1, b1 + 1), range(b2, 10)) for f in fields_lower])
                 rule += ")"
+
+                # constriction_options = list(set([c for c in permutations(list(range(b1 + 1, b2))*len(fields_lower), len(fields_lower))]))
+
+                # rule = f"(({fields[0]}{b1} & {fields[1]}{b2} | {fields[0]}{b2} & {fields[1]}{b1}) & "
+                # rule += grouped(or_clause([grouped(and_clause([f"{fields_lower[i]}{c[i]}" for i in range(len(c))])) for c in constriction_options]))
+                # rule += ")"
 
                 letter_rules.append(rule)
             all_rules.append(grouped(or_clause(letter_rules)))

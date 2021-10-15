@@ -3,6 +3,7 @@
 - add more rulesets!
 - enable string & file input again
 - prepare the example puzzle
+- save puzzles to file
 - check if a sudoku possesses a *unique* solution
 - more interactive cli for solving the sudokus
 
