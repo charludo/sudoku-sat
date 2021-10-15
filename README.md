@@ -1,6 +1,5 @@
 # ToDo / ToFigureOut
 
-- add more rulesets!
 - enable string & file input again
 - prepare the example puzzle
 - save puzzles to file

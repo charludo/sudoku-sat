@@ -1,5 +1,6 @@
+from itertools import permutations
 from src.rulesets.rulesets import Ruleset
-from src.common.connectives import and_clause, or_clause, grouped
+from src.common.connectives import and_clause, or_clause, grouped, ks
 
 
 class Thermometer(Ruleset):
@@ -14,10 +15,5 @@ class Thermometer(Ruleset):
         steps.sort(key=lambda t: t[0])
         steps = [x[1] for x in steps]
 
-        sliding_window = len(steps)
-
-        variants = []
-        for i in range(9 - sliding_window + 1):
-            variants.append(grouped(and_clause([s + str(steps.index(s) + i + 1) for s in steps])))
-
-        return grouped(or_clause(variants))
+        possible = [p for p in permutations(ks, len(steps)) if p == tuple(sorted(p))]
+        return grouped(or_clause([grouped(and_clause([f"{steps[i]}{p[i]}" for i in range(len(p))])) for p in possible]))

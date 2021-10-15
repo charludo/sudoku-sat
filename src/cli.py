@@ -89,6 +89,7 @@ def run(debug, from_string, from_file, force_rebuild):
             logger.debug(layer)
 
         # next selection
+        logger.info("Add layer / delete layer / solve / exit:")
         choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[e] exit"]
         tm = TM(choices)
         action = tm.show()
