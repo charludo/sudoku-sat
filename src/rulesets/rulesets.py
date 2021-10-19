@@ -16,6 +16,7 @@ from src.common.utils import ruleset_dir
 
 class Ruleset(ABC):
     """ base class for all rulesets """
+    from random import randint, shuffle
 
     def __init__(self, *args, **kwargs):
         self.logger = logging.getLogger("base.rule")
@@ -29,11 +30,36 @@ class Ruleset(ABC):
     def to_sat(self, layer, *args, **kwargs):
         return layer
 
-    def create_new(self):
-        return "." * 81
+    def random_rule(self):
+        return None
 
     def rebuild(self):
         pass
+
+    def random_layers(self, max=4):
+        lines = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        self.shuffle(lines)
+        for line in lines[0:self.randint(0, max)]:
+            rule = self.random_rule()
+            if not rule:
+                continue
+
+            before_pad = [0 for i in range(self.randint(0, 9 - len(rule)))]
+            after_pad = [0 for i in range(9 - len(rule) - len(before_pad))]
+            rule = before_pad + rule + after_pad
+
+            if self.randint(0, 1) == 0:
+                yield self.to_row(rule, line)
+            else:
+                yield self.to_col(rule, line)
+
+    def to_row(self, rule, row):
+        str_row = "".join([str(x) if x != 0 else "." for x in rule])
+        return "........." * row + str_row + "........." * (8 - row)
+
+    def to_col(self, rule, col):
+        str_col = "".join([str(x) if x != 0 else "." for x in rule])
+        return "".join(["." * col + str_col[i] + "." * (8 - col) for i in range(9)])
 
 
 class RulesetManager:

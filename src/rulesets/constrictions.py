@@ -40,3 +40,6 @@ class Constrictions(Ruleset):
                 letter_rules.append(rule)
             all_rules.append(grouped(or_clause(letter_rules)))
         return grouped(and_clause(all_rules))
+
+    def random_rule(self):
+        return list("A" + "a" * self.randint(1, 5) + "A")

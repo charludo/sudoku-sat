@@ -21,3 +21,10 @@ class Thermometer(Ruleset):
             variants.append(grouped(and_clause([s + str(steps.index(s) + i + 1) for s in steps])))
 
         return grouped(or_clause(variants))
+
+    def random_rule(self):
+        counter = list(range(1, self.randint(3, 6)))
+        if self.randint(0, 1) == 1:
+            counter.reverse()
+
+        return counter

@@ -32,11 +32,12 @@ def setup_loggers(level):
 
 
 @click.command()
+@click.option("--generate", "-g", help="generate a new sudoku", is_flag=True)
 @click.option("--force-rebuild", "-r", help="force a rebuild of static rulesets", is_flag=True)
 @click.option("--from-file", "-f", help="read sudoku from a file")
 @click.option("--from-string", "-s", help="pass an 81-char sudoku string")
 @click.option("--debug", "-d", help="set logging level to debug", is_flag=True)
-def run(debug, from_string, from_file, force_rebuild):
+def run(debug, from_string, from_file, force_rebuild, generate):
     """
     sudoku-sat generates SAT formulas for sudokus with optional additional rulesets
     """
@@ -45,6 +46,9 @@ def run(debug, from_string, from_file, force_rebuild):
     s = Sudoku()
 
     rulesets = s.get_rulesets()
+
+    if generate:
+        s.new_random_sudoku()
 
     if force_rebuild:
         logger.info("rebuilding all static rulesets...")

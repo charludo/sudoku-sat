@@ -24,3 +24,6 @@ class AreaSums(Ruleset):
     def generate_for_area(value, fields):
         summands = [(i, j) for i, j in permutations(ks, 2) if i != j and i + j == value]
         return grouped(or_clause([f"({fields[0]}{i} & {fields[1]}{j})" for i, j in summands]))
+
+    def random_rule(self):
+        return list("CDEFGHIJKLMNOPQ"[self.randint(0, 14)]*2)

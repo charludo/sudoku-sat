@@ -77,6 +77,11 @@ class Sudoku:
                         f.writelines([" ".join(f"{layer[i:i + 9]}\n") for i in range(0, 81, 9)])
                         f.write("\n")
 
+    def new_random_sudoku(self):
+        for name, ruleset in self.rulesets.items():
+            for layer in ruleset["instance"].random_layers():
+                self.add_layer(name, layer)
+
     def solve(self):
         max_solutions = self.found_solutions + 3
         satisfiable = True

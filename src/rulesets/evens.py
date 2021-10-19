@@ -11,3 +11,6 @@ class Evens(Ruleset):
         fields = [f"S{i // 9 + 1}{i % 9+ 1}" for i in range(81) if layer[i] != "."]
 
         return grouped(and_clause([grouped(or_clause([field + str(i) for i in "2468"])) for field in fields])) if len(fields) else None
+
+    def random_rule(self):
+        return ["E"]
