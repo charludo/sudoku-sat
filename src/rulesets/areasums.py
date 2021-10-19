@@ -8,7 +8,7 @@ class AreaSums(Ruleset):
     def register(self):
         return "AreaSums", "Allowed: from C=3 up to Q=17. Mark exactly two adjacent fields w/ same letter.", -1
 
-    def generate(self, layer):
+    def to_sat(self, layer):
         areas = {}
         for i in range(81):
             if layer[i] in "CDEFGHIJKLMNOPQ":

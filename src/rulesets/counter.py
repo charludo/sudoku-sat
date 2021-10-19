@@ -7,7 +7,7 @@ class Thermometer(Ruleset):
     def register(self):
         return "Counter", "Enter counter, in ascending order from 1 to (max) 9", -1
 
-    def generate(self, layer):
+    def to_sat(self, layer):
         if len(layer.replace(".", "")) < 2:
             return None
         steps = [(int(layer[i]), f"S{i // 9 + 1}{i % 9+ 1}") for i in range(81) if layer[i] in "123456789"]

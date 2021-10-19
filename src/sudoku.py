@@ -84,7 +84,7 @@ class Sudoku:
             formula = []
             for name, layers in self.layers.items():
                 for layer in layers:
-                    f = self.rulesets[name]["instance"].generate(layer=layer)
+                    f = self.rulesets[name]["instance"].to_sat(layer=layer)
                     if f:
                         formula.append(f)
             formula = and_clause(formula)

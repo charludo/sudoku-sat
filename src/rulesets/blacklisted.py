@@ -8,7 +8,7 @@ class Blacklisted(Ruleset):
     def register(self):
         return "Blacklisted", "Complete solution that is blacklisted in order to find a new one.", -1
 
-    def generate(self, layer):
+    def to_sat(self, layer):
         if len(re.sub(r"[^1-9]", "", layer)) != 81:
             return None
 

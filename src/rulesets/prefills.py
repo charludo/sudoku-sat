@@ -4,7 +4,7 @@ from src.common.connectives import and_clause, grouped
 
 class Prefills(Ruleset):
 
-    def generate(self, layer):
+    def to_sat(self, layer):
         clauses = [f"S{i // 9 + 1}{i % 9+ 1}{layer[i]}" for i in range(81) if layer[i] in "123456789"]
         return grouped(and_clause(clauses)) if len(clauses) else None
 

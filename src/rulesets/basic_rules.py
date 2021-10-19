@@ -8,7 +8,7 @@ class BasicRules(Ruleset):
     def register(self):
         return "Basic Rules", " ", 1
 
-    def generate(self, **kwargs):
+    def to_sat(self, **kwargs):
         try:
             return read_static("basic_rules.txt")
         except FileNotFoundError:

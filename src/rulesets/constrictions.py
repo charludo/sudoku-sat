@@ -8,7 +8,7 @@ class Constrictions(Ruleset):
     def register(self):
         return "Constrictions", "Upper/lower bounds: A-Z, constricted fields: a-z", -1
 
-    def generate(self, layer):
+    def to_sat(self, layer):
         bounds = {}
         constricted = {}
         for i in range(81):

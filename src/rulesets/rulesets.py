@@ -26,8 +26,11 @@ class Ruleset(ABC):
         return "Base", "Help Text", 1
 
     @abstractmethod
-    def generate(self, layer, *args, **kwargs):
+    def to_sat(self, layer, *args, **kwargs):
         return layer
+
+    def create_new(self):
+        return "." * 81
 
     def rebuild(self):
         pass
