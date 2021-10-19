@@ -82,6 +82,15 @@ class Sudoku:
             for layer in ruleset["instance"].random_layers():
                 self.add_layer(name, layer)
 
+        solutions = list(self.solve())
+        if solutions == [0]:
+            # Sudoku is too strict, has no solutions
+            
+
+        if len(solutions) == 1:
+            # Sudoku has only one solution
+            return
+
     def solve(self):
         for solution in self.find_solutions():
             if solution == 0:
