@@ -36,7 +36,7 @@ class Ruleset(ABC):
     def rebuild(self):
         pass
 
-    def random_layers(self, max=4):
+    def random_layers(self, max=5):
         lines = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         self.shuffle(lines)
         for line in lines[0:self.randint(0, max)]:
