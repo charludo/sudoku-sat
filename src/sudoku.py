@@ -83,6 +83,19 @@ class Sudoku:
                 self.add_layer(name, layer)
 
     def solve(self):
+        for solution in self.find_solutions():
+            if solution == 0:
+                if self.found_solutions == 0:
+                    self.logger.error("Sudoku posseses no solution.")
+                elif self.found_solutions == 1:
+                    self.logger.info("Sudoku posseses exactly 1 solution.")
+                else:
+                    self.logger.info("All possible solutions found.")
+            else:
+                self.logger.info(f"New solution found! (Total: {self.found_solutions})")
+                self.prettify(solution)
+
+    def find_solutions(self):
         max_solutions = self.found_solutions + 3
         satisfiable = True
         while self.found_solutions < max_solutions and satisfiable:
@@ -103,21 +116,13 @@ class Sudoku:
             os.remove("temp.txt")
 
             if "UNSATISFIABLE formula" in str(output):
-                if self.found_solutions == 0:
-                    self.logger.error("Sudoku posseses no solution.")
-                elif self.found_solutions == 1:
-                    self.logger.info("Sudoku posseses exactly 1 solution.")
-                else:
-                    self.logger.info("All possible solutions found.")
                 satisfiable = False
+                yield 0
             else:
                 self.found_solutions += 1
-                self.logger.info(f"New solution found! (Total: {self.found_solutions})")
-                self.logger_indented.info("  ----- | ----- | -----")
                 solution = self.extract_solution(str(output))
-                self.prettify(solution)
-
                 self.add_layer("Blacklisted", "".join(solution))
+                yield solution
 
     @staticmethod
     def extract_solution(output):
@@ -133,6 +138,7 @@ class Sudoku:
         return solution
 
     def prettify(self, solution):
+        self.logger_indented.info("  ----- | ----- | -----")
         for i in range(9):
             line = solution[i*9:(i+1)*9]
             line.insert(3, " ")
