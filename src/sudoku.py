@@ -20,6 +20,7 @@ class Sudoku:
         self.rulesets = self.RM.get_rulesets()
         self.layers = {}
         self.add_layer("Basic Rules", "1-9 in every row, column, area")
+        self.found_solutions = 0
 
     def add_layer(self, name, layer):
         self.layers.setdefault(name, [])
@@ -77,30 +78,41 @@ class Sudoku:
                         f.write("\n")
 
     def solve(self):
-        formula = []
-        for name, layers in self.layers.items():
-            for layer in layers:
-                f = self.rulesets[name]["instance"].generate(layer=layer)
-                if f:
-                    formula.append(f)
-        formula = and_clause(formula)
+        max_solutions = self.found_solutions + 3
+        satisfiable = True
+        while self.found_solutions < max_solutions and satisfiable:
+            formula = []
+            for name, layers in self.layers.items():
+                for layer in layers:
+                    f = self.rulesets[name]["instance"].generate(layer=layer)
+                    if f:
+                        formula.append(f)
+            formula = and_clause(formula)
 
-        with open("temp.txt", "w") as file:
-            file.write(formula)
+            with open("temp.txt", "w") as file:
+                file.write(formula)
 
-        p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
-        (output, error) = p.communicate()
-        p.wait()
-        os.remove("temp.txt")
+            p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
+            (output, error) = p.communicate()
+            p.wait()
+            os.remove("temp.txt")
 
-        if "UNSATISFIABLE formula" in str(output):
-            self.logger.error("Sudoku posseses no solution.")
-        else:
-            self.logger.info("Solution found!")
-            self.logger_indented.info("  ----- | ----- | -----")
-            solution = self.extract_solution(str(output))
+            if "UNSATISFIABLE formula" in str(output):
+                if self.found_solutions == 0:
+                    self.logger.error("Sudoku posseses no solution.")
+                elif self.found_solutions == 1:
+                    self.logger.info("Sudoku posseses exactly 1 solution.")
+                else:
+                    self.logger.info("All possible solutions found.")
+                satisfiable = False
+            else:
+                self.found_solutions += 1
+                self.logger.info(f"New solution found! (Total: {self.found_solutions})")
+                self.logger_indented.info("  ----- | ----- | -----")
+                solution = self.extract_solution(str(output))
+                self.prettify(solution)
 
-            self.prettify(solution)
+                self.add_layer("Blacklisted", "".join(solution))
 
     @staticmethod
     def extract_solution(output):
