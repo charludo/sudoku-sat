@@ -56,7 +56,10 @@ def run(debug, from_string, from_file, force_rebuild, generate):
         logger.info("done rebuilding static rulesets.")
 
     choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[e] exit"]
-    action = choices.index("Prefills")
+    try:
+        action = choices.index("Prefills")
+    except ValueError:
+        action = len(choices) - 3
 
     if from_string:
         layer = s.layer_from_string(from_string)

@@ -78,18 +78,32 @@ class Sudoku:
                         f.write("\n")
 
     def new_random_sudoku(self):
-        for name, ruleset in self.rulesets.items():
-            for layer in ruleset["instance"].random_layers():
-                self.add_layer(name, layer)
+        solutions = list(self.find_solutions())
+        self.layers["Blacklisted"] = []
+        self.found_solutions = 0
 
-        solutions = list(self.solve())
         if solutions == [0]:
-            # Sudoku is too strict, has no solutions
-            
+            # Sudoku is too strict, has no solutionsm remove some rules
+            for name, layers in self.layers.items():
+                if name not in ["Basic Rules", "Prefills"] and len(layers):
+                    layers.pop()
+            self.new_random_sudoku()
 
-        if len(solutions) == 1:
+        elif len(solutions) < 3:
             # Sudoku has only one solution
             return
+
+        else:
+            # Sudoku is not strict enough, add some rules
+            if "Prefills" in self.layers and len(self.layers["Prefills"]):
+                self.layers["Prefills"] = []
+                for name, ruleset in self.rulesets.items():
+                    for layer in ruleset["instance"].random_layers():
+                        self.add_layer(name, layer)
+            else:
+                self.layers["Prefills"] = ["".join([solutions[0][i] if solutions[0][i] == solutions[1][i] else "." for i in range(len(solutions[0]))])]
+            self.logger.debug(f"Rule Count: {sum([len(x) for x in self.layers.values()])}")
+            self.new_random_sudoku()
 
     def solve(self):
         for solution in self.find_solutions():
