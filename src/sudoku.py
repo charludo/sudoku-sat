@@ -92,8 +92,6 @@ class Sudoku:
         solutions = list(self.find_solutions(blacklist_found=False))
 
         while solutions == [0]:
-            print("test")
-            
             self.init_layers()
             self.randomize_layers()
             solutions = list(self.find_solutions(blacklist_found=False))
@@ -124,7 +122,11 @@ class Sudoku:
                     self.logger.info("All possible solutions found.")
             else:
                 self.logger.info(f"New solution found! (Total: {self.found_solutions})")
-                self.prettify(solution)
+                if self.layers["Prefills"] and len(self.layers["Prefills"]):
+                    prefills = list(self.layers["Prefills"][0])
+                else:
+                    prefills = ["."] * 81
+                self.prettify(solution, prefills)
 
     def find_solutions(self, blacklist_found=True):
         max_solutions = self.found_solutions + 3
@@ -173,7 +175,10 @@ class Sudoku:
 
         return solution
 
-    def prettify(self, solution):
+    def prettify(self, solution, prefills):
+        for i in range(81):
+            if solution[i] != prefills[i]:
+                solution[i] = "\033[92m" + solution[i] + "\033[0m"
         self.logger_indented.info("  ----- | ----- | -----")
         for i in range(9):
             line = solution[i*9:(i+1)*9]
