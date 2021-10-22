@@ -4,6 +4,7 @@ and solving the sudoku
 """
 import re
 import os
+import random
 import logging
 import subprocess
 from src.common.utils import clean
@@ -18,9 +19,12 @@ class Sudoku:
         self.logger_indented = logging.getLogger("indented")
         self.RM = RulesetManager()
         self.rulesets = self.RM.get_rulesets()
+        self.init_layers()
+        self.found_solutions = 0
+
+    def init_layers(self):
         self.layers = {}
         self.add_layer("Basic Rules", "1-9 in every row, column, area")
-        self.found_solutions = 0
 
     def add_layer(self, name, layer):
         self.layers.setdefault(name, [])
@@ -77,33 +81,37 @@ class Sudoku:
                         f.writelines([" ".join(f"{layer[i:i + 9]}\n") for i in range(0, 81, 9)])
                         f.write("\n")
 
+    def randomize_layers(self):
+        for name, ruleset in self.rulesets.items():
+            for layer in ruleset["instance"].random_layers():
+                self.add_layer(name, layer)
+
     def new_random_sudoku(self):
-        solutions = list(self.find_solutions())
-        self.layers["Blacklisted"] = []
-        self.found_solutions = 0
+        # Step 1: generate a bunch of random rules, check that they are solvable
+        self.randomize_layers()
+        solutions = list(self.find_solutions(blacklist_found=False))
 
-        if solutions == [0]:
-            # Sudoku is too strict, has no solutionsm remove some rules
-            for name, layers in self.layers.items():
-                if name not in ["Basic Rules", "Prefills"] and len(layers):
-                    layers.pop()
-            self.new_random_sudoku()
+        while solutions == [0]:
+            print("test")
+            
+            self.init_layers()
+            self.randomize_layers()
+            solutions = list(self.find_solutions(blacklist_found=False))
 
-        elif len(solutions) < 3:
-            # Sudoku has only one solution
-            return
+        # Step 2: use the first (probably non-unique) solution and add its entries in a random way until solution is unique
+        solution = solutions[0]
 
-        else:
-            # Sudoku is not strict enough, add some rules
-            if "Prefills" in self.layers and len(self.layers["Prefills"]):
-                self.layers["Prefills"] = []
-                for name, ruleset in self.rulesets.items():
-                    for layer in ruleset["instance"].random_layers():
-                        self.add_layer(name, layer)
-            else:
-                self.layers["Prefills"] = ["".join([solutions[0][i] if solutions[0][i] == solutions[1][i] else "." for i in range(len(solutions[0]))])]
-            self.logger.debug(f"Rule Count: {sum([len(x) for x in self.layers.values()])}")
-            self.new_random_sudoku()
+        hint_order = list(range(81))
+        random.shuffle(hint_order)
+
+        hints = ["."] * 81
+        hint_count = 0
+
+        while len(solutions) != 1 and hint_count < 81:
+            hints[hint_order[hint_count]] = solution[hint_order[hint_count]]
+            self.layers["Prefills"] = ["".join(hints)]
+            hint_count += 1
+            solutions = list(self.find_solutions(blacklist_found=False))
 
     def solve(self):
         for solution in self.find_solutions():
@@ -118,7 +126,7 @@ class Sudoku:
                 self.logger.info(f"New solution found! (Total: {self.found_solutions})")
                 self.prettify(solution)
 
-    def find_solutions(self):
+    def find_solutions(self, blacklist_found=True):
         max_solutions = self.found_solutions + 3
         satisfiable = True
         while self.found_solutions < max_solutions and satisfiable:
@@ -140,12 +148,17 @@ class Sudoku:
 
             if "UNSATISFIABLE formula" in str(output):
                 satisfiable = False
-                yield 0
+                if self.found_solutions == 0:
+                    yield 0
             else:
                 self.found_solutions += 1
                 solution = self.extract_solution(str(output))
                 self.add_layer("Blacklisted", "".join(solution))
                 yield solution
+
+        if not blacklist_found:
+            self.layers["Blacklisted"] = []
+            self.found_solutions = 0
 
     @staticmethod
     def extract_solution(output):
