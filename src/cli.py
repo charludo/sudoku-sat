@@ -55,11 +55,11 @@ def run(debug, from_string, from_file, force_rebuild, generate):
         s.force_rebuild()
         logger.info("done rebuilding static rulesets.")
 
-    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[e] exit"]
+    choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[p] print", "[e] exit"]
     try:
         action = choices.index("Prefills")
     except ValueError:
-        action = len(choices) - 3
+        action = len(choices) - 4
 
     if from_string:
         layer = s.layer_from_string(from_string)
@@ -77,14 +77,17 @@ def run(debug, from_string, from_file, force_rebuild, generate):
             pass
 
         elif action == len(choices) - 2:
+            s.print_puzzle()
+
+        elif action == len(choices) - 3:
             s.write_to_file()
 
         # solve!
-        elif action == len(choices) - 3:
+        elif action == len(choices) - 4:
             s.solve()
 
         # delete layer
-        elif action == len(choices) - 4:
+        elif action == len(choices) - 5:
             layers = [*s.get_current_layers(), "[a] abort"]
             tm = TM(layers)
             action = tm.show()
@@ -108,6 +111,6 @@ def run(debug, from_string, from_file, force_rebuild, generate):
 
         # next selection
         logger.info("Add layer / delete layer / solve / exit:")
-        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[e] exit"]
+        choices = [*s.get_available_layers(), "[d] delete layer", "[s] solve sudoku", "[w] write to file", "[p] print", "[e] exit"]
         tm = TM(choices)
         action = tm.show()

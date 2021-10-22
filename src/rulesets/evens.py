@@ -14,3 +14,6 @@ class Evens(Ruleset):
 
     def random_rule(self):
         return ["E"]
+
+    def to_html(self, layer):
+        return ['<div class="even"></div>' if layer[i] != "." else "" for i in range(81)]

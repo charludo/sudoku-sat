@@ -195,3 +195,10 @@ class Sudoku:
 
     def get_rulesets(self):
         return self.rulesets
+
+    def print_puzzle(self):
+        fields = [""] * 81
+        for name, layers in self.layers.items():
+            if name not in ["Blacklisted", "Basic Rules"]:
+                for layer in layers:
+                    fields = [m+n for m, n in zip(fields, self.rulesets[name]["instance"].to_html(layer))]

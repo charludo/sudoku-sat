@@ -61,6 +61,17 @@ class Ruleset(ABC):
         str_col = "".join([str(x) if x != 0 else "." for x in rule])
         return "".join(["." * col + str_col[i] + "." * (8 - col) for i in range(9)])
 
+    def to_html(self, layer):
+        return [""] * 81
+
+    def is_horizontal(self, layer):
+        if layer.replace(".", "") in layer:
+            return True
+        return False
+
+    def length(self, layer):
+        return len(layer.replace(".", ""))
+
 
 class RulesetManager:
     """ discovers, registers and pipes in rulesets """

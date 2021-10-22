@@ -28,3 +28,14 @@ class Thermometer(Ruleset):
             counter.reverse()
 
         return counter
+
+    def to_html(self, layer):
+        first = next((i for i in range(81) if layer[i] != "."), -1)
+        if first < -1:
+            return super().to_html()
+
+        if self.is_horizontal(layer):
+            return [f'<div class="counter horizontal len-{self.length(layer)}"></div>' if i == first else "" for i in range(81)]
+
+        else:
+            return [f'<div class="counter vertical len-{self.length(layer)}"></div>' if i == first else "" for i in range(81)]

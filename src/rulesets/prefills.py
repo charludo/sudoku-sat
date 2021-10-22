@@ -10,3 +10,6 @@ class Prefills(Ruleset):
 
     def register(self):
         return "Prefills", "Allowed Characters: 123456789 and .", 1
+
+    def to_html(self, layer):
+        return [layer[i] if layer[i] != "." else "" for i in range(81)]

@@ -27,3 +27,16 @@ class AreaSums(Ruleset):
 
     def random_rule(self):
         return list("CDEFGHIJKLMNOPQ"[self.randint(0, 14)]*2)
+
+    def to_html(self, layer):
+        first = next((i for i in range(81) if layer[i] != "."), -1)
+        if first < -1:
+            return super().to_html()
+
+        sum_value = ord(layer[first]) - 64
+
+        if self.is_horizontal(layer):
+            return [f'<div class="areasum horizontal">{sum_value}</div>' if i == first else "" for i in range(81)]
+
+        else:
+            return [f'<div class="areasum vertical">{sum_value}</div>' if i == first else "" for i in range(81)]

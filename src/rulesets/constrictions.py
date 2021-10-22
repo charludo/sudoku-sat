@@ -43,3 +43,14 @@ class Constrictions(Ruleset):
 
     def random_rule(self):
         return list("A" + "a" * self.randint(1, 5) + "A")
+
+    def to_html(self, layer):
+        first = next((i for i in range(81) if layer[i] != "."), -1)
+        if first < -1:
+            return super().to_html()
+
+        if self.is_horizontal(layer):
+            return [f'<div class="constriction horizontal len-{self.length(layer)}"></div>' if i == first else "" for i in range(81)]
+
+        else:
+            return [f'<div class="constriction vertical len-{self.length(layer)}"></div>' if i == first else "" for i in range(81)]

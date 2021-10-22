@@ -14,3 +14,6 @@ class Odds(Ruleset):
 
     def random_rule(self):
         return ["O"]
+
+    def to_html(self, layer):
+        return ['<div class="odd"></div>' if layer[i] != "." else "" for i in range(81)]
