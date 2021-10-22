@@ -6,7 +6,9 @@ import re
 import os
 import random
 import logging
+import webbrowser
 import subprocess
+from jinja2 import Environment, FileSystemLoader
 from src.common.utils import clean
 from src.common.connectives import and_clause
 from src.rulesets.rulesets import RulesetManager
@@ -202,3 +204,10 @@ class Sudoku:
             if name not in ["Blacklisted", "Basic Rules"]:
                 for layer in layers:
                     fields = [m+n for m, n in zip(fields, self.rulesets[name]["instance"].to_html(layer))]
+
+        jinja = Environment(loader=FileSystemLoader("/home/charlotte/bachelorarbeit/sudoku-sat/src/common"))
+        page_template = jinja.get_template("template.html")
+        with open("out.html", "w") as file:
+            file.write(page_template.render(fields=fields))
+
+        webbrowser.open("file:///home/charlotte/bachelorarbeit/sudoku-sat/out.html")

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Sudoku</title>
+		<style media="screen">
+		@charset "UTF-8";
+
+* {
+box-sizing: content-box;
+}
+
+table {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+border: 6px solid #333;
+}
+
+table tr:nth-child(3) td, table tr:nth-child(6) td {
+border-bottom: 4px solid #333;
+}
+
+table td {
+width: 60px;
+max-width: 60px;
+height: 60px;
+max-height: 60px;
+border: 1px solid #333;
+text-align: center;
+font-size: 45px;
+font-family: sans-serif;
+position: relative;
+}
+
+table td div {
+z-index: -1;
+}
+
+table td:nth-child(3), table td:nth-child(6) {
+border-right: 4px solid #333;
+}
+
+.even {
+border-radius: 0px;
+background-color: #ccc;
+height: 50px;
+width: 50px;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+.odd {
+border-radius: 60px;
+background-color: #ccc;
+height: 50px;
+width: 50px;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+.areasum {
+width: 15px;
+height: 15px;
+border: 3px dotted #999;
+position: absolute;
+top: 5px;
+left: 5px;
+font-size: 14px;
+padding-right: 30px;
+padding-bottom: 95px;
+text-align: left;
+}
+
+.areasum.vertical {
+width: 15px;
+padding-right: 30px;
+padding-bottom: 95px;
+}
+
+.areasum.vertical.len-1 {
+height: 15px;
+}
+
+.areasum.vertical.len-2 {
+height: 15px;
+}
+
+.areasum.vertical.len-3 {
+height: 15px;
+}
+
+.areasum.vertical.len-4 {
+height: 15px;
+}
+
+.areasum.vertical.len-5 {
+height: 15px;
+}
+
+.areasum.vertical.len-6 {
+height: 15px;
+}
+
+.areasum.horizontal {
+height: 15px;
+padding-right: 95px;
+padding-bottom: 30px;
+}
+
+.areasum.horizontal.len-1 {
+width: 15px;
+}
+
+.areasum.horizontal.len-2 {
+width: 15px;
+}
+
+.areasum.horizontal.len-3 {
+width: 15px;
+}
+
+.areasum.horizontal.len-4 {
+width: 15px;
+}
+
+.areasum.horizontal.len-5 {
+width: 15px;
+}
+
+.areasum.horizontal.len-6 {
+width: 15px;
+}
+
+.constriction {
+background-color: #ccc;
+z-index: -1;
+position: absolute;
+}
+
+.constriction::before {
+position: absolute;
+left: 0;
+top: 50%;
+transform: translateY(-50%);
+background-color: #ccc;
+height: 50px;
+width: 8px;
+content: "";
+}
+
+.constriction::after {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+background-color: #ccc;
+height: 50px;
+width: 8px;
+content: "";
+}
+
+.constriction.vertical {
+top: 0;
+left: 50%;
+transform: translateX(-50%);
+}
+
+.constriction.vertical::before {
+position: absolute;
+top: 0;
+left: 50%;
+transform: translate(-50%, 0);
+background-color: #ccc;
+width: 50px;
+height: 8px;
+}
+
+.constriction.vertical::after {
+position: absolute;
+left: 50%;
+transform: translate(-50%, 0);
+background-color: #ccc;
+width: 50px;
+height: 8px;
+}
+
+.thermometer {
+background-color: #ccc;
+z-index: -1;
+position: absolute;
+top: 0;
+left: 50%;
+transform: translateX(-50%);
+border-radius: 4px;
+}
+
+.thermometer::before {
+position: absolute;
+left: 50%;
+top: 0;
+transform: translateX(-50%);
+background-color: #ccc;
+height: 40px;
+width: 40px;
+border-radius: 60px;
+content: "";
+}
+
+.thermometer.horizontal {
+top: 50%;
+left: 0;
+transform: translate(0, -50%);
+}
+
+.thermometer.horizontal::before {
+left: 0;
+top: 50%;
+transform: translate(0, -50%);
+}
+
+.counter {
+background-color: #ccc;
+z-index: -1;
+position: absolute;
+top: 0;
+left: 50%;
+transform: translateX(-50%);
+border-radius: 4px;
+}
+
+.counter::before {
+position: absolute;
+left: 50%;
+top: -18px;
+transform: translateX(-50%);
+content: "▼";
+color: #ccc;
+font-size: 60px;
+}
+
+.counter.horizontal {
+top: 50%;
+left: 0;
+transform: translate(0, -50%);
+}
+
+.counter.horizontal::before {
+left: -18px;
+top: 50%;
+transform: translate(0, -50%);
+}
+
+.vertical {
+width: 10px;
+}
+
+.vertical.len-1 {
+height: 100%;
+}
+
+.vertical.len-1::after {
+top: 100%;
+}
+
+.vertical.len-2 {
+height: 200%;
+}
+
+.vertical.len-2::after {
+top: 100%;
+}
+
+.vertical.len-3 {
+height: 300%;
+}
+
+.vertical.len-3::after {
+top: 100%;
+}
+
+.vertical.len-4 {
+height: 400%;
+}
+
+.vertical.len-4::after {
+top: 100%;
+}
+
+.vertical.len-5 {
+height: 500%;
+}
+
+.vertical.len-5::after {
+top: 100%;
+}
+
+.vertical.len-6 {
+height: 600%;
+}
+
+.vertical.len-6::after {
+top: 100%;
+}
+
+.horizontal {
+height: 10px;
+}
+
+.horizontal.len-1 {
+width: 100%;
+}
+
+.horizontal.len-1::after {
+left: 100%;
+}
+
+.horizontal.len-2 {
+width: 200%;
+}
+
+.horizontal.len-2::after {
+left: 100%;
+}
+
+.horizontal.len-3 {
+width: 300%;
+}
+
+.horizontal.len-3::after {
+left: 100%;
+}
+
+.horizontal.len-4 {
+width: 400%;
+}
+
+.horizontal.len-4::after {
+left: 100%;
+}
+
+.horizontal.len-5 {
+width: 500%;
+}
+
+.horizontal.len-5::after {
+left: 100%;
+}
+
+.horizontal.len-6 {
+width: 600%;
+}
+
+.horizontal.len-6::after {
+left: 100%;
+}
+		</style>
+	</head>
+	<body>
+		<table cellspacing=0>
+			<tr><td>{{ fields[0] }}</td><td>{{ fields[1] }}</td><td>{{ fields[2] }}</td><td>{{ fields[3] }}</td><td>{{ fields[4] }}</td><td>{{ fields[5] }}</td><td>{{ fields[6] }}</td><td>{{ fields[7] }}</td><td>{{ fields[8] }}</td></tr>
+			<tr><td>{{ fields[9] }}</td><td>{{ fields[10] }}</td><td>{{ fields[11] }}</td><td>{{ fields[12] }}</td><td>{{ fields[13] }}</td><td>{{ fields[14] }}</td><td>{{ fields[15] }}</td><td>{{ fields[16] }}</td><td>{{ fields[17] }}</td></tr>
+			<tr><td>{{ fields[18] }}</td><td>{{ fields[19] }}</td><td>{{ fields[20] }}</td><td>{{ fields[21] }}</td><td>{{ fields[22] }}</td><td>{{ fields[23] }}</td><td>{{ fields[24] }}</td><td>{{ fields[25] }}</td><td>{{ fields[26] }}</td></tr>
+			<tr><td>{{ fields[27] }}</td><td>{{ fields[28] }}</td><td>{{ fields[29] }}</td><td>{{ fields[30] }}</td><td>{{ fields[31] }}</td><td>{{ fields[32] }}</td><td>{{ fields[33] }}</td><td>{{ fields[34] }}</td><td>{{ fields[35] }}</td></tr>
+			<tr><td>{{ fields[36] }}</td><td>{{ fields[37] }}</td><td>{{ fields[38] }}</td><td>{{ fields[39] }}</td><td>{{ fields[40] }}</td><td>{{ fields[41] }}</td><td>{{ fields[42] }}</td><td>{{ fields[43] }}</td><td>{{ fields[44] }}</td></tr>
+			<tr><td>{{ fields[45] }}</td><td>{{ fields[46] }}</td><td>{{ fields[47] }}</td><td>{{ fields[48] }}</td><td>{{ fields[49] }}</td><td>{{ fields[50] }}</td><td>{{ fields[51] }}</td><td>{{ fields[52] }}</td><td>{{ fields[53] }}</td></tr>
+			<tr><td>{{ fields[54] }}</td><td>{{ fields[55] }}</td><td>{{ fields[56] }}</td><td>{{ fields[57] }}</td><td>{{ fields[58] }}</td><td>{{ fields[59] }}</td><td>{{ fields[60] }}</td><td>{{ fields[61] }}</td><td>{{ fields[62] }}</td></tr>
+			<tr><td>{{ fields[63] }}</td><td>{{ fields[64] }}</td><td>{{ fields[65] }}</td><td>{{ fields[66] }}</td><td>{{ fields[67] }}</td><td>{{ fields[68] }}</td><td>{{ fields[69] }}</td><td>{{ fields[70] }}</td><td>{{ fields[71] }}</td></tr>
+			<tr><td>{{ fields[72] }}</td><td>{{ fields[73] }}</td><td>{{ fields[74] }}</td><td>{{ fields[75] }}</td><td>{{ fields[76] }}</td><td>{{ fields[77] }}</td><td>{{ fields[78] }}</td><td>{{ fields[79] }}</td><td>{{ fields[80] }}</td></tr>
+		</table>
+	</body>
+</html>
