@@ -145,7 +145,7 @@ class Sudoku:
                         f = self.rulesets[name]["instance"].to_smt(layer=layer)
                     else:
                         f = self.rulesets[name]["instance"].to_sat(layer=layer)
-                    if f:
+                    if f is not None:
                         formula.append(f)
             if self.z3:
                 # formula = And(formula)
