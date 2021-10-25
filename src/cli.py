@@ -32,18 +32,19 @@ def setup_loggers(level):
 
 
 @click.command()
+@click.option("--smt-z3", "-z", help="solve with z3 instead of limboole", is_flag=True)
 @click.option("--generate", "-g", help="generate a new sudoku", is_flag=True)
 @click.option("--force-rebuild", "-r", help="force a rebuild of static rulesets", is_flag=True)
 @click.option("--from-file", "-f", help="read sudoku from a file")
 @click.option("--from-string", "-s", help="pass an 81-char sudoku string")
 @click.option("--debug", "-d", help="set logging level to debug", is_flag=True)
-def run(debug, from_string, from_file, force_rebuild, generate):
+def run(debug, from_string, from_file, force_rebuild, generate, smt_z3):
     """
     sudoku-sat generates SAT formulas for sudokus with optional additional rulesets
     """
     setup_loggers("DEBUG" if debug else "INFO")
 
-    s = Sudoku()
+    s = Sudoku(z3=smt_z3)
 
     rulesets = s.get_rulesets()
 

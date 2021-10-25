@@ -30,6 +30,10 @@ class Ruleset(ABC):
     def to_sat(self, layer, *args, **kwargs):
         return layer
 
+    # @abstractmethod
+    def to_smt(self, layer, *args, **kwargs):
+        return None
+
     def random_rule(self):
         return None
 

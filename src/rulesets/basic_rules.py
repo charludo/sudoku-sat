@@ -1,3 +1,4 @@
+from z3 import And, Int, Distinct
 from src.rulesets.rulesets import Ruleset
 from src.common.utils import write_static, read_static
 from src.common.connectives import and_clause, or_clause, grouped, ks
@@ -23,6 +24,8 @@ class BasicRules(Ruleset):
         basic_rules = and_clause([self.number_everywhere(), self.no_double_entries(), rows, columns, areas])
 
         write_static("basic_rules.txt", basic_rules)
+
+        write_static("basic_rules_smt.txt", self.z3_rules())
 
     @staticmethod
     def number_everywhere():
@@ -67,3 +70,15 @@ class BasicRules(Ruleset):
         positions = [f"{i}{j}" for i in iv for j in jv]
 
         return and_clause([grouped(and_clause([f"(!S{p1}{k} | !S{p2}{k})" for k in ks])) for p1 in positions for p2 in positions if p1 != p2])
+
+    def to_smt(self, **kwargs):
+        """ smt logic roughly follows this guide: https://ericpony.github.io/z3py-tutorial/guide-examples.htm """
+        x = [[Int(f"S{i}{j}") for j in ks] for i in ks]
+
+        constrained_cells = [And(1 <= x[i][j], x[i][j] <= 9) for i in range(9) for j in range(9)]
+        constrained_rows = [Distinct(x[i]) for i in range(9)]
+        constrained_cols = [Distinct([x[i][j] for i in range(9)]) for j in range(9)]
+
+        constrained_area = [Distinct([x[3*i0 + i][3*j0 + j] for i in range(3) for j in range(3)]) for i0 in range(3) for j0 in range(3)]
+
+        return constrained_cells + constrained_rows + constrained_cols + constrained_area

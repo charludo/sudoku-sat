@@ -8,6 +8,7 @@ import random
 import logging
 import webbrowser
 import subprocess
+from z3 import Int, Solver, sat
 from jinja2 import Environment, FileSystemLoader
 from src.common.utils import clean
 from src.common.connectives import and_clause
@@ -16,11 +17,14 @@ from src.rulesets.rulesets import RulesetManager
 
 class Sudoku:
 
-    def __init__(self):
+    def __init__(self, z3):
         self.logger = logging.getLogger("base.core")
         self.logger_indented = logging.getLogger("indented")
+
         self.RM = RulesetManager()
         self.rulesets = self.RM.get_rulesets()
+
+        self.z3 = z3
         self.init_layers()
         self.found_solutions = 0
 
@@ -137,26 +141,44 @@ class Sudoku:
             formula = []
             for name, layers in self.layers.items():
                 for layer in layers:
-                    f = self.rulesets[name]["instance"].to_sat(layer=layer)
+                    if self.z3:
+                        f = self.rulesets[name]["instance"].to_smt(layer=layer)
+                    else:
+                        f = self.rulesets[name]["instance"].to_sat(layer=layer)
                     if f:
                         formula.append(f)
-            formula = and_clause(formula)
+            if self.z3:
+                # formula = And(formula)
 
-            with open("temp.txt", "w") as file:
-                file.write(formula)
+                s = Solver()
+                s.add([item for sublist in formula for item in sublist])
+                if s.check() == sat:
+                    m = s.model()
+                    solution = [str(m.evaluate(Int(f"S{i+1}{j+1}"))) for i in range(9) for j in range(9)]
+                else:
+                    satisfiable = False
 
-            p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
-            (output, error) = p.communicate()
-            p.wait()
-            os.remove("temp.txt")
+            else:
+                formula = and_clause(formula)
 
-            if "UNSATISFIABLE formula" in str(output):
-                satisfiable = False
+                with open("temp.txt", "w") as file:
+                    file.write(formula)
+
+                p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
+                (output, error) = p.communicate()
+                p.wait()
+                os.remove("temp.txt")
+
+                if "UNSATISFIABLE formula" in str(output):
+                    satisfiable = False
+
+            if not satisfiable:
                 if self.found_solutions == 0:
                     yield 0
             else:
                 self.found_solutions += 1
-                solution = self.extract_solution(str(output))
+                if not self.z3:
+                    solution = self.extract_solution(str(output))
                 self.add_layer("Blacklisted", "".join(solution))
                 yield solution
 
