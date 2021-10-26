@@ -1,3 +1,4 @@
+from z3 import Int
 from itertools import permutations
 from src.rulesets.rulesets import Ruleset
 from src.common.connectives import and_clause, or_clause, grouped, ks
@@ -19,6 +20,18 @@ class AreaSums(Ruleset):
             if len(fields) == 2:
                 rules.append(self.generate_for_area(value, fields))
         return grouped(and_clause(rules))
+
+    def to_smt(self, layer):
+        areas = {}
+        for i in range(81):
+            if layer[i] in "CDEFGHIJKLMNOPQ":
+                areas.setdefault(ord(layer[i]) - 64, []).append(f"S{i // 9 + 1}{i % 9+ 1}")
+
+        rules = []
+        for value, fields in areas.items():
+            if len(fields) == 2:
+                rules.append(Int(fields[0]) + Int(fields[1]) == value)
+        return rules
 
     @staticmethod
     def generate_for_area(value, fields):

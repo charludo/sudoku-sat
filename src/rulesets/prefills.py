@@ -17,7 +17,3 @@ class Prefills(Ruleset):
 
     def to_html(self, layer):
         return [layer[i] if layer[i] != "." else "" for i in range(81)]
-
-
-# p = Prefills()
-# print(p.to_smt("123.............................................................................."))
