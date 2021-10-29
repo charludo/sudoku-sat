@@ -7,6 +7,8 @@ setuptools.setup(name='sudoku-sat',
                  install_requires=[
                     "click>=8.0.0",
                     "coloredlogs>=15.0.0",
-                    "simple-term-menu>=1.4.1"
+                    "simple-term-menu>=1.4.1",
+                    "Jinja2>=3.0.2",
+                    "z3-solver>=4.8.12.0"
                  ]
                  )
