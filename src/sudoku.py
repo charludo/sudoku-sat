@@ -17,7 +17,7 @@ from src.rulesets.rulesets import RulesetManager
 
 class Sudoku:
 
-    def __init__(self, z3):
+    def __init__(self, z3=False):
         self.logger = logging.getLogger("base.core")
         self.logger_indented = logging.getLogger("indented")
 
@@ -92,21 +92,32 @@ class Sudoku:
             for layer in ruleset["instance"].random_layers():
                 self.add_layer(name, layer)
 
-    def new_random_sudoku(self):
-        # Step 1: generate a bunch of random rules, check that they are solvable
-        self.randomize_layers()
-        solutions = list(self.find_solutions(blacklist_found=False))
-
-        while solutions == [0]:
-            self.init_layers()
+    def new_random_sudoku(self, complex=True):
+        if complex:
+            # Step 1: generate a bunch of random rules, check that they are solvable
             self.randomize_layers()
+            solutions = list(self.find_solutions(blacklist_found=False))
+
+            while solutions == [0]:
+                self.init_layers()
+                self.randomize_layers()
+                solutions = list(self.find_solutions(blacklist_found=False))
+        else:
             solutions = list(self.find_solutions(blacklist_found=False))
 
         # Step 2: use the first (probably non-unique) solution and add its entries in a random way until solution is unique
         solution = solutions[0]
 
-        hint_order = list(range(81))
+        hint_order = [list(range(i, i+9)) for i in range(0, 81, 9)]
+        print(hint_order)
+
+        for i in hint_order:
+            random.shuffle(i)
         random.shuffle(hint_order)
+        print(hint_order)
+
+        hint_order = sum(hint_order, [])
+        print(hint_order)
 
         hints = ["."] * 81
         hint_count = 0
@@ -134,8 +145,24 @@ class Sudoku:
                     prefills = ["."] * 81
                 self.prettify(solution, prefills)
 
-    def find_solutions(self, blacklist_found=True):
-        max_solutions = self.found_solutions + 3
+    def get_solutions_info(self):
+        solutions = list(self.find_solutions(max_new=2))
+        solvable = {}
+        unique = {}
+        if len(solutions) > 1:
+            unique = {"uniquely_solvable": False}
+        if solutions == [0]:
+            solvable = {"solvable": False}
+            solutions[0] = "unsolvable"
+            unique = {"uniquely_solvable": False}
+        return {
+            "solvable": True,
+            "uniquely_solvable": True,
+            "solution": "".join(solutions[0])
+        } | solvable | unique
+
+    def find_solutions(self, blacklist_found=True, max_new=3):
+        max_solutions = self.found_solutions + max_new
         satisfiable = True
         while self.found_solutions < max_solutions and satisfiable:
             formula = []
@@ -164,7 +191,8 @@ class Sudoku:
                 with open("temp.txt", "w") as file:
                     file.write(formula)
 
-                p = subprocess.Popen("../limboole1.2/limboole -s temp.txt", stdout=subprocess.PIPE, shell=True)
+                base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                p = subprocess.Popen(os.path.join(base, "limboole1.2/limboole -s temp.txt"), stdout=subprocess.PIPE, shell=True)
                 (output, error) = p.communicate()
                 p.wait()
                 os.remove("temp.txt")
