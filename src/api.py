@@ -7,13 +7,13 @@ app = FastAPI()
 
 
 class Item(BaseModel):
-    prefills: str = "." * 81
-    areasums: Set[str] = set()
-    constrictions: Set[str] = set()
-    counter: Set[str] = set()
-    evens: Set[str] = set()
-    odds: Set[str] = set()
-    thermometer: Set[str] = set()
+    Prefills: str = "." * 81
+    AreaSums: Set[str] = set()
+    Constrictions: Set[str] = set()
+    Counter: Set[str] = set()
+    Evens: Set[str] = set()
+    Odds: Set[str] = set()
+    Thermometer: Set[str] = set()
 
 
 @app.get("/check_if_solvable/{prefills}")
@@ -23,20 +23,41 @@ async def check_solvability(prefills: str):
     return s.get_solutions_info()["solvable"]
 
 
-@app.get("/solve_basic/{prefills}")
+@app.get("/solve/{prefills}")
 async def solve_basic_sudoku(prefills: str):
     s = Sudoku()
     s.add_layer("Prefills", s.layer_from_string(prefills))
     return s.get_solutions_info()
 
 
-@app.post("/solve_complex")
+@app.post("/solve")
 async def solve_complex_sudoku(item: Item):
-    return item.evens
+    return item
 
 
-@app.get("/generate_basic")
-async def generatew_basic_sudoku():
+@app.get("/generate/easy")
+async def generate_easy_sudoku():
     s = Sudoku()
-    s.new_random_sudoku(complex=False)
-    return s.layers["Prefills"][0]
+    return s.generate_basic_sudoku()
+
+
+@app.get("/generate/medium")
+async def generate_medium_sudoku():
+    s = Sudoku()
+    return s.generate_basic_sudoku(level=2)
+
+
+@app.get("/generate/hard")
+async def generate_hard_sudoku():
+    s = Sudoku()
+    return s.generate_basic_sudoku(level=3)
+
+
+@app.get("/generate/complex")
+async def generate_complex_sudoku():
+    s = Sudoku()
+    s.new_random_sudoku()
+    item = s.layers
+    del item["Basic Rules"]
+    del item["Blacklisted"]
+    return item

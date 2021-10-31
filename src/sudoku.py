@@ -92,41 +92,89 @@ class Sudoku:
             for layer in ruleset["instance"].random_layers():
                 self.add_layer(name, layer)
 
-    def new_random_sudoku(self, complex=True):
-        if complex:
-            # Step 1: generate a bunch of random rules, check that they are solvable
+    def generate_basic_sudoku(self, level=1):
+        # Generate seed
+        seed = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        random.shuffle(seed)
+        seed = list(self.layer_from_string("".join(seed)))
+        rnd = random.randint(0, 8) * 9
+        seed[:] = seed[-rnd:] + seed[:-rnd]
+        self.add_layer("Prefills", clean("".join(seed)))
+
+        # get a solution from that seed
+        solution = self.get_single_solution()
+
+        # remove half of the hints until a unique solution is found
+        uniquely_solvable = False
+        while not uniquely_solvable:
+            hints = "".join([k if random.randint(0, 1) == 0 else "." for k in solution])
+            self.layers["Prefills"] = [hints]
+            uniquely_solvable = self.get_solutions_info()["uniquely_solvable"]
+        easy = hints
+
+        medium = {}
+        if level >= 2:
+            uniquely_solvable = False
+            while not uniquely_solvable:
+                hints = "".join([k if random.randint(0, 5) > 1 else "." for k in easy])
+                self.layers["Prefills"] = [hints]
+                uniquely_solvable = self.get_solutions_info()["uniquely_solvable"]
+            medium = {"hints_medium": hints}
+
+        hard = {}
+        if level >= 3:
+            uniquely_solvable = False
+            while not uniquely_solvable:
+                hints = "".join([k if random.randint(0, 6) > 0 else "." for k in medium["hints_medium"]])
+                self.layers["Prefills"] = [hints]
+                uniquely_solvable = self.get_solutions_info()["uniquely_solvable"]
+            hard = {"hints_hard": hints}
+
+        return {
+            "solution": solution,
+            "hints_easy": easy
+        } | medium | hard
+
+    def get_single_solution(self):
+        return "".join(list(self.find_solutions(max_new=1, blacklist_found=False))[0])
+
+    def new_random_sudoku(self):
+        # Step 1: generate a bunch of random rules, check that they are solvable
+        self.randomize_layers()
+        solutions = list(self.find_solutions(blacklist_found=False))
+
+        while solutions == [0]:
+            self.init_layers()
             self.randomize_layers()
             solutions = list(self.find_solutions(blacklist_found=False))
 
-            while solutions == [0]:
-                self.init_layers()
-                self.randomize_layers()
-                solutions = list(self.find_solutions(blacklist_found=False))
-        else:
-            solutions = list(self.find_solutions(blacklist_found=False))
-
         # Step 2: use the first (probably non-unique) solution and add its entries in a random way until solution is unique
-        solution = solutions[0]
+        # solution = solutions[0]
 
-        hint_order = [list(range(i, i+9)) for i in range(0, 81, 9)]
-        print(hint_order)
+        # hint_order = [list(range(i, i+9)) for i in range(0, 81, 9)]
 
-        for i in hint_order:
-            random.shuffle(i)
-        random.shuffle(hint_order)
-        print(hint_order)
+        # for i in hint_order:
+        #    random.shuffle(i)
+        # random.shuffle(hint_order)
 
-        hint_order = sum(hint_order, [])
-        print(hint_order)
+        # hint_order = sum(hint_order, [])
 
-        hints = ["."] * 81
-        hint_count = 0
+        # hints = ["."] * 81
+        # hint_count = 0
 
-        while len(solutions) != 1 and hint_count < 81:
-            hints[hint_order[hint_count]] = solution[hint_order[hint_count]]
-            self.layers["Prefills"] = ["".join(hints)]
-            hint_count += 1
-            solutions = list(self.find_solutions(blacklist_found=False))
+        # while len(solutions) != 1 and hint_count < 81:
+        #    hints[hint_order[hint_count]] = solution[hint_order[hint_count]]
+        #    self.layers["Prefills"] = ["".join(hints)]
+        #    hint_count += 1
+        #    solutions = list(self.find_solutions(blacklist_found=False))
+        solution = "".join(solutions[0])
+        self.generated_solution = solution
+
+        uniquely_solvable = False
+        while not uniquely_solvable:
+            hints = "".join([k if random.randint(0, 3) == 0 else "." for k in solution])
+            self.layers["Prefills"] = [hints]
+            uniquely_solvable = self.get_solutions_info()["uniquely_solvable"]
 
     def solve(self):
         for solution in self.find_solutions():
@@ -146,7 +194,7 @@ class Sudoku:
                 self.prettify(solution, prefills)
 
     def get_solutions_info(self):
-        solutions = list(self.find_solutions(max_new=2))
+        solutions = list(self.find_solutions(max_new=2, blacklist_found=False))
         solvable = {}
         unique = {}
         if len(solutions) > 1:
