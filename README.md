@@ -1,16 +1,25 @@
-# ToDo / ToFigureOut
+# sudoku-sat
 
-- more interactive cli for solving the sudokus
-- more rules
-- snake rules?
+Solve and generate basic Sudokus and Sudokus with an extended set of rules.
 
-# Installation Instructions
+See `sudoku-sat --help` for all options.
 
-- unpack, compile, install limboole & lingeling next to this cloned repo
-- python3.9 required
-- `python -m venv .venv`
-- `. .venv/bin/activate`
-- `cd sudoku-sat`
-- `pip install -e .`
+Required Python version: `>= 3.9`
 
-Now see `sudoku-sat --help` for all options.
+## Recommended Installation Instructions
+
+- install `limboole`, either through your system's package manager or manually
+- install `sudoku-sat`:
+	- `python -m venv .sudoku-sat`
+	- `. ./sudoku-sat/bin/activate`
+	- `pip install sudoku-sat`
+
+## Manual Installation Instructions
+
+- install `limboole`, either through your system's package manager or manually
+	- install `sudoku-sat`:
+	- `git clone git@github.com:charludo/sudoku-sat.git`
+	- `python -m venv .sudoku-sat`
+	- `. .sudoku-sat/bin/activate`
+	- `cd sudoku-sat`
+	- `pip install -e .`
