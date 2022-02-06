@@ -17,12 +17,14 @@ from src.rulesets.rulesets import RulesetManager
 
 class Sudoku:
 
-    def __init__(self, z3=False):
+    def __init__(self, limboole, z3=False):
         self.logger = logging.getLogger("base.core")
         self.logger_indented = logging.getLogger("indented")
 
         self.RM = RulesetManager()
         self.rulesets = self.RM.get_rulesets()
+
+        self.limboole = limboole
 
         self.z3 = z3
         self.init_layers()
@@ -239,8 +241,7 @@ class Sudoku:
                 with open("temp.txt", "w") as file:
                     file.write(formula)
 
-                base = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-                p = subprocess.Popen(os.path.join(base, "limboole1.2/limboole -s temp.txt"), stdout=subprocess.PIPE, shell=True)
+                p = subprocess.Popen(f"{self.limboole} -s temp.txt", stdout=subprocess.PIPE, shell=True)
                 (output, error) = p.communicate()
                 p.wait()
                 os.remove("temp.txt")
@@ -303,9 +304,11 @@ class Sudoku:
                 for layer in layers:
                     fields = [m+n for m, n in zip(fields, self.rulesets[name]["instance"].to_html(layer))]
 
-        jinja = Environment(loader=FileSystemLoader("/home/charlotte/bachelorarbeit/sudoku-sat/src/common"))
+        base = os.path.dirname(os.path.dirname(__file__))
+        common = os.path.join(base, "src", "common")
+        jinja = Environment(loader=FileSystemLoader(common))
         page_template = jinja.get_template("template.html")
-        with open("out.html", "w") as file:
+        with open(os.path.join(base, "out.html"), "w") as file:
             file.write(page_template.render(fields=fields))
 
-        webbrowser.open("file:///home/charlotte/bachelorarbeit/sudoku-sat/out.html")
+        webbrowser.open(f"file://{base}/out.html")

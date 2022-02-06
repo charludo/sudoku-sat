@@ -1,6 +1,8 @@
 import click
 import logging
+import subprocess
 import coloredlogs
+from os import environ
 from simple_term_menu import TerminalMenu as TM
 from src.sudoku import Sudoku
 
@@ -37,14 +39,33 @@ def setup_loggers(level):
 @click.option("--force-rebuild", "-r", help="force a rebuild of static rulesets", is_flag=True)
 @click.option("--from-file", "-f", help="read sudoku from a file")
 @click.option("--from-string", "-s", help="pass an 81-char sudoku string")
+@click.option("--limboole", "-l", help="specify and store absolute path to limboole executable", required=False, type=str)
 @click.option("--debug", "-d", help="set logging level to debug", is_flag=True)
-def run(debug, from_string, from_file, force_rebuild, generate, smt_z3):
+def run(debug, limboole, from_string, from_file, force_rebuild, generate, smt_z3):
     """
     sudoku-sat generates SAT formulas for sudokus with optional additional rulesets
     """
     setup_loggers("DEBUG" if debug else "INFO")
 
-    s = Sudoku(z3=smt_z3)
+    if limboole:
+        with open(".limboole", "w") as f:
+            f.write(limboole)
+    else:
+        try:
+            with open(".limboole", "r") as f:
+                limboole = f.read()
+        except FileNotFoundError:
+            p = subprocess.Popen("limboole -s ''", stdout=subprocess.PIPE, shell=True)
+            (output, error) = p.communicate()
+            p.wait()
+
+            if "could no read" in str(output):
+                limboole = "limboole"
+            else:
+                logger.error("limboole installation not found. Specify and store custom executable path with --limboole")
+                return
+
+    s = Sudoku(limboole, z3=smt_z3)
 
     rulesets = s.get_rulesets()
 
